@@ -5,6 +5,7 @@ import com.roy.cheetah.rpc.net.AbstractRpcAcceptor;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.nio.channels.ServerSocketChannel;
 
@@ -44,14 +45,42 @@ public class RpcNioAcceptor extends AbstractRpcAcceptor {
         super.startService();
         try {
             if (selector == null) {
-                selector = new
+                selector = new SimpleRpcNioSelector();
+                selector.startService();
+                serverSocketChannel.socket().bind(new InetSocketAddress(this.getHost(), this.getPort()));
+                selector.register(this);
+                this.startListeners();
+                this.fireStartNetListeners();
             }
+        } catch (IOException e) {
+            this.handleNetException(e);
         }
+    }
+
+    @Override
+    public void stopService() {
+        super.stopService();
+        if (serverSocketChannel != null) {
+            try {
+                serverSocketChannel.close();
+                if (selector != null) {
+                    selector.stopService();
+                }
+            } catch (IOException e) {
+
+            }
+
+        }
+        this.stopListeners();
     }
 
     public void handleNetException(Exception e) {
         logger.error("nio acceptor io exception, start to shutdown service!");
         this.stopService();
         throw new RpcException(e);
+    }
+
+    public ServerSocketChannel getServerSocketChannel() {
+        return serverSocketChannel;
     }
 }
