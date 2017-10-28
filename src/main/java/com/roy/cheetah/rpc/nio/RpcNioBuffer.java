@@ -1,7 +1,13 @@
 package com.roy.cheetah.rpc.nio;
 
+import com.roy.cheetah.rpc.RpcObject;
 import com.roy.cheetah.rpc.constants.Constants;
+import com.roy.cheetah.rpc.constants.RpcType;
+import com.roy.cheetah.rpc.exception.RpcException;
 import com.roy.cheetah.rpc.utils.ArraysUtils;
+import com.roy.cheetah.rpc.utils.NioUtils;
+import com.roy.cheetah.rpc.utils.RpcUtils;
+import org.apache.log4j.lf5.viewer.LogFactor5Dialog;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -76,8 +82,87 @@ public class RpcNioBuffer {
         if (writeIndex - readIndex >= Constants.RPC_PROTOCOL_HEAD_LEN) {
             byte[] lenbuf = new byte[4];
             System.arraycopy(buf, readIndex + 16, lenbuf, 0, 4);
-            int len =
+            int len = RpcUtils.bytesToInt(lenbuf);
+            if (writeIndex - readIndex >= NioUtils.RPC_PROTOCOL_HEAD_LEN + len) {
+                return true;
+            }
         }
+        return false;
+    }
+
+    public void writeInt(int i) {
+        byte[] bytes = RpcUtils.intToBytes(i);
+        this.write(bytes);
+    }
+
+    public void writeLong(long v) {
+        byte[] bytes = RpcUtils.longToBytes(v);
+        this.write(bytes);
+    }
+
+    public int readInt() {
+        byte[] intBuf = new byte[4];
+        System.arraycopy(buf, readIndex, intBuf,0,4);
+        readIndex += 4;
+        return RpcUtils.bytesToInt(intBuf);
+    }
+
+    public long readLong() {
+        byte[] longBuf = new byte[8];
+        System.arraycopy(buf, readIndex, longBuf, 0, 8);
+        readIndex += 8;
+        return RpcUtils.bytesToLong(longBuf);
+    }
+    public byte[] readBytes(int len) {
+        byte[] byteBuf = new byte[len];
+        System.arraycopy(buf, readIndex, byteBuf, 0, len);
+        readIndex += len;
+        return byteBuf;
+    }
+
+    public byte[] readBytes() {
+        int len = writeIndex - readIndex;
+        byte[] byteBuf = new byte[len];
+        System.arraycopy(buf, readIndex, byteBuf, 0, len);
+        readIndex += len;
+        if (readIndex > buf.length / 2) {
+            this.compact();
+        }
+        return byteBuf;
+    }
+
+    public void clear() {
+        readIndex = 0;
+        writeIndex = 0;
+    }
+
+    public void writeRpcObject(RpcObject rpcObject) {
+        this.writeInt(rpcObject.getType().getType());
+        this.writeLong(rpcObject.getThreadId());
+        this.writeInt(rpcObject.getIndex());
+        this.writeInt(rpcObject.getLength());
+        if (rpcObject.getLength() > 0) {
+            this.write(rpcObject.getData());
+        }
+    }
+
+    public RpcObject readRpcObject() {
+        RpcObject rpcObject = new RpcObject();
+        int type = this.readInt();
+        rpcObject.setType(RpcType.getByType(type));
+        rpcObject.setThreadId(this.readLong());
+        rpcObject.setIndex(this.readInt());
+        rpcObject.setLength(this.readInt());
+        if (rpcObject.getLength() > 0) {
+            if (rpcObject.getLength() > RpcUtils.MEM_1M) {
+                throw new RpcException("rpc data is too long " + rpcObject.getLength());
+            }
+            rpcObject.setData(this.readBytes(rpcObject.getLength()));
+        }
+        if (readIndex > buf.length / 2) {
+            this.compact();
+        }
+        return rpcObject;
     }
 
     private void grow(int minCapacity) {

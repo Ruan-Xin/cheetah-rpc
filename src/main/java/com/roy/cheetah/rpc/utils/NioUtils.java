@@ -16,6 +16,8 @@ public class NioUtils {
 
     private final static Logger logger = Logger.getLogger(NioUtils.class);
 
+    public final static int RPC_PROTOCOL_HEAD_LEN = 20;
+
     public static byte[] zip(byte[] bytes) {
         if (bytes != null && bytes.length > 0) {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();

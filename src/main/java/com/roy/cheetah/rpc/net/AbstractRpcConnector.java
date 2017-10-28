@@ -19,8 +19,8 @@ public abstract class AbstractRpcConnector extends RpcNetBase implements RpcServ
 
     protected boolean stop = false;
     private Logger logger = Logger.getLogger(AbstractRpcConnector.class);
-    private String remoteHost;
-    private int remotePort;
+    protected String remoteHost;
+    protected int remotePort;
     protected ConcurrentHashMap<String, Object> rpcContext;
 
     private RpcOutputNofity outputNofity;
