@@ -42,7 +42,7 @@ public class RpcObject {
     /**
      * 请求发送发
      */
-    private String port;
+    private int port;
 
     private ConcurrentHashMap<String, Object> rpcContext;
 
@@ -113,11 +113,11 @@ public class RpcObject {
         this.host = host;
     }
 
-    public String getPort() {
+    public int getPort() {
         return port;
     }
 
-    public void setPort(String port) {
+    public void setPort(int port) {
         this.port = port;
     }
 

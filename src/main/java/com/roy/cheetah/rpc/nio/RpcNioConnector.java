@@ -30,7 +30,7 @@ public class RpcNioConnector extends AbstractRpcConnector{
 
     private RpcNioAcceptor acceptor;
 
-    private Logger logger = Logger.getLogger(RpcNioConnector.class);
+    private static final Logger logger = Logger.getLogger(RpcNioConnector.class);
 
     public RpcNioConnector(SocketChannel socketChannel, AbstractRpcNioSelector selection) {
         this(selection);
@@ -64,7 +64,9 @@ public class RpcNioConnector extends AbstractRpcConnector{
             String remote = RpcUtils.genAddressString("remoteAddress->", remoteAddress);
             String local = RpcUtils.genAddressString("localAddress->", localAddress);
             logger.info(local + " " + remote);
-            remoteP
+            remotePort = remoteAddress.getPort();
+            remoteHost = remoteAddress.getAddress().getHostAddress();
+            this.fireStartNetListeners();
         } catch(IOException e){
             logger.error("connect to host "+this.getHost()+" port "+this.getPort()+" failed", e);
             throw new RpcException("connect to host error");
@@ -72,11 +74,29 @@ public class RpcNioConnector extends AbstractRpcConnector{
     }
 
     public void stopService() {
+        super.stopService();
+        this.selector.unRegister(this);
+        this.sendQueueCache.clear();
+        this.rpcContext.clear();
+        try {
+            channel.close();
+            channelWriteBuffer.clear();
+            channelReadBuffer.clear();
+            rpcNioReadBuffer.clear();
+            rpcNioWriteBuffer.clear();
+        } catch (IOException e) {
+            //ignore
+        }
+        this.stop = true;
+    }
 
+    public boolean isValid() {
+        return !stop;
     }
 
     public void handleNetException(Exception e) {
-
+        logger.error("connector " + this.getHost() + ":" + this.getPort() + " io exception start to shutdown");
+        this.stopService();
     }
 
     @Override
@@ -85,10 +105,79 @@ public class RpcNioConnector extends AbstractRpcConnector{
         this.selector.addRpcNetListener(listener);
     }
 
+    @Override
+    public void notifySend() {
+        selector.notifySend(this);
+    }
+
     private void initBuf(){
         channelWriteBuffer = ByteBuffer.allocate(RpcUtils.MEM_512KB);
         channelReadBuffer = ByteBuffer.allocate(RpcUtils.MEM_512KB);
         rpcNioReadBuffer = new RpcNioBuffer(RpcUtils.MEM_512KB);
         rpcNioWriteBuffer = new RpcNioBuffer(RpcUtils.MEM_512KB);
+    }
+
+    public SocketChannel getChannel() {
+        return channel;
+    }
+
+    public void setChannel(SocketChannel channel) {
+        this.channel = channel;
+    }
+
+    public AbstractRpcNioSelector getSelector() {
+        return selector;
+    }
+
+    public void setSelector(AbstractRpcNioSelector selector) {
+        this.selector = selector;
+    }
+
+    public ByteBuffer getChannelWriteBuffer() {
+        return channelWriteBuffer;
+    }
+
+    public void setChannelWriteBuffer(ByteBuffer channelWriteBuffer) {
+        this.channelWriteBuffer = channelWriteBuffer;
+    }
+
+    public ByteBuffer getChannelReadBuffer() {
+        return channelReadBuffer;
+    }
+
+    public void setChannelReadBuffer(ByteBuffer channelReadBuffer) {
+        this.channelReadBuffer = channelReadBuffer;
+    }
+
+    public SelectionKey getSelectionKey() {
+        return selectionKey;
+    }
+
+    public void setSelectionKey(SelectionKey selectionKey) {
+        this.selectionKey = selectionKey;
+    }
+
+    public RpcNioBuffer getRpcNioReadBuffer() {
+        return rpcNioReadBuffer;
+    }
+
+    public void setRpcNioReadBuffer(RpcNioBuffer rpcNioReadBuffer) {
+        this.rpcNioReadBuffer = rpcNioReadBuffer;
+    }
+
+    public RpcNioBuffer getRpcNioWriteBuffer() {
+        return rpcNioWriteBuffer;
+    }
+
+    public void setRpcNioWriteBuffer(RpcNioBuffer rpcNioWriteBuffer) {
+        this.rpcNioWriteBuffer = rpcNioWriteBuffer;
+    }
+
+    public RpcNioAcceptor getAcceptor() {
+        return acceptor;
+    }
+
+    public void setAcceptor(RpcNioAcceptor acceptor) {
+        this.acceptor = acceptor;
     }
 }

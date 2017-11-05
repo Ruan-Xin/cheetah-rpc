@@ -66,6 +66,19 @@ public abstract class AbstractRpcConnector extends RpcNetBase implements RpcServ
         }
     }
 
+    public void fireCall(final RpcObject rpc) {
+        this.getExecutorService().execute(new Runnable() {
+            public void run() {
+                try {
+                    fireCallListeners(rpc, AbstractRpcConnector.this);
+                } catch (Exception e) {
+                    logger.error("fire call err:" + e.getMessage(), e);
+                }
+
+            }
+        });
+    }
+
     public boolean isStop() {
         return stop;
     }
