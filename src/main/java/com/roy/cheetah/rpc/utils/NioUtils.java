@@ -25,16 +25,16 @@ public class NioUtils {
             try {
                 gos = new GZIPOutputStream(bos);
                 gos.write(bytes);
+                //gis.close()需要放在生成字节数组之前，不然字节可能未解压完成
+                gos.close();
                 return bos.toByteArray();
             } catch (IOException e) {
                 logger.error("NioUtils occurs ERROR: ", e);
             } finally {
-                if (gos != null) {
-                    try {
-                        gos.close();
-                    } catch (IOException e) {
-                        logger.error("NioUtils occurs ERROR: ", e);
-                    }
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    //ignore
                 }
             }
         }
@@ -43,33 +43,25 @@ public class NioUtils {
 
     public static byte[] unzip(byte[] bytes) {
         GZIPInputStream gis = null;
-        ByteArrayOutputStream bos = null;
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
             gis = new GZIPInputStream(new ByteArrayInputStream(bytes));
-            bos = new ByteArrayOutputStream();
             byte[] buff = new byte[512];
             int read = gis.read(buff);
             while (read > 0) {
-                bos.write(buff, 0,read);
+                bos.write(buff, 0, read);
                 read = gis.read(buff);
             }
+            //gis.close()需要放在生成字节数组之前，不然字节可能未解压完成
+            gis.close();
             return bos.toByteArray();
         } catch (IOException e) {
             logger.error("NioUtils occurs ERROR: ", e);
         } finally {
-            if (gis != null) {
-                try {
-                    gis.close();
-                } catch (IOException e) {
-                    logger.error("NioUtils occurs ERROR: ", e);
-                }
-            }
-            if (bos != null) {
-                try {
-                    bos.close();
-                } catch (IOException e) {
-                    logger.error("NioUtils occurs ERROR: ", e);
-                }
+            try {
+                bos.close();
+            } catch (IOException e) {
+                //ignore
             }
         }
         return new byte[0];
