@@ -2,7 +2,6 @@ package com.roy.cheetah.rpc.nio;
 
 import com.roy.cheetah.rpc.exception.RpcException;
 import com.roy.cheetah.rpc.net.AbstractRpcConnector;
-import com.roy.cheetah.rpc.net.AbstractRpcWriter;
 import com.roy.cheetah.rpc.net.RpcNetListener;
 import com.roy.cheetah.rpc.utils.RpcUtils;
 import org.apache.log4j.Logger;

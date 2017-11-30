@@ -42,14 +42,57 @@ public class NioClient implements RpcCallListener {
         client.threadCount = threadCount;
         return client;
     }
+
+    public static void main(String[] args) throws InterruptedException {
+        SimpleRpcNioSelector selector = new SimpleRpcNioSelector();
+        String ip = "127.0.0.1";
+        int basePort = 3333;
+        int clientCount = 5;
+        int connectors = 2;
+        int threadCount = 2;
+        List<NioClient> clients = createClients(selector, ip, basePort, clientCount, connectors, threadCount);
+        startService(clients);
+        Thread.currentThread().sleep(60000);
+        stopService(clients);
+        Thread.currentThread().sleep(10000);
+        printResult(clients);
+    }
+
+    public static List<NioClient> createClients (SimpleRpcNioSelector selection, String ip, int port, int clients,int connectors, int threadCount) {
+        List<NioClient> list = new LinkedList<NioClient>();
+        int i = 0;
+        while (i < clients) {
+            NioClient client = new NioClient(selection);
+            client.host = ip;
+            client.port = port + i;
+            client.threadCount = threadCount;
+
+            list.add(client);
+            int con = 0;
+            while (con < connectors) {
+                list.add(client.clone());
+                con++;
+            }
+            i++;
+        }
+        return list;
+    }
+    public static void printResult(List<NioClient> clients) {
+        for (NioClient client : clients) {
+            client.printResult();
+        }
+    }
+
     public static void startService(List<NioClient> clients) {
         int i = 0;
         for (NioClient client : clients) {
-            client
+            client.startService();
+            i++;
         }
+        logger.info("start client count:" + i);
     }
     public void onRpcMessage(RpcObject rpc, RpcSender sender) {
-
+        receive.incrementAndGet();
     }
 
     public class SendThread extends Thread {
@@ -69,11 +112,24 @@ public class NioClient implements RpcCallListener {
             long threadId = Thread.currentThread().getId();
             logger.info("send thread:"+ threadId + " start" + host + ":" + port);
             while (true) {
-                RpcObject rpc = crea
+                RpcObject rpc = createRpc(prefix + index, threadId, index);
+                connector.sendRpcObject(rpc, 10000);
+                NioClient.this.send.incrementAndGet();
+                index++;
+                try {
+                    Thread.currentThread().sleep(interval);
+                } catch (InterruptedException ex) {
+                    break;
+                }
             }
         }
     }
 
+    public static void stopService(List<NioClient> clients) {
+        for (NioClient client : clients) {
+            client.stopService();
+        }
+    }
     public static RpcObject createRpc(String str, long id, int index) {
         RpcObject rpc = new RpcObject();
         rpc.setType(RpcType.INVOKE);
@@ -92,7 +148,9 @@ public class NioClient implements RpcCallListener {
             connector.setPort(port);
             connector.addRpcCallListener(this);
             connector.startService();
-            threads =
+            threads = startThread(connector, threadCount);
+            cccc.incrementAndGet();
+            logger.info("start time :" + cccc.get());
         }
     }
 
@@ -103,7 +161,21 @@ public class NioClient implements RpcCallListener {
         while (c < count) {
             int intervel = random.nextInt(200);
             int index = random.nextInt(20000);
-            Send
+            SendThread thread = new SendThread(connector, intervel, index);
+            linkedList.add(thread);
+            thread.start();
+            c++;
+        }
+        return linkedList;
+    }
+
+    public void printResult(){
+        logger.info(this.host+":"+this.port+"  send:"+send.get()+" receive:"+receive.get());
+    }
+
+    public void stopService() {
+        for (Thread thread : threads) {
+            thread.interrupt();
         }
     }
 }
