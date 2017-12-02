@@ -45,12 +45,12 @@ public class RpcNioAcceptor extends AbstractRpcAcceptor {
         try {
             if (selector == null) {
                 selector = new SimpleRpcNioSelector();
-                selector.startService();
-                serverSocketChannel.socket().bind(new InetSocketAddress(this.getHost(), this.getPort()));
-                selector.register(this);
-                this.startListeners();
-                this.fireStartNetListeners();
             }
+            selector.startService();
+            serverSocketChannel.socket().bind(new InetSocketAddress(this.getHost(), this.getPort()));
+            selector.register(this);
+            this.startListeners();
+            this.fireStartNetListeners();
         } catch (IOException e) {
             this.handleNetException(e);
         }
