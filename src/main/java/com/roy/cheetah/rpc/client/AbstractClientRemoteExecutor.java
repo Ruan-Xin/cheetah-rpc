@@ -1,6 +1,7 @@
 package com.roy.cheetah.rpc.client;
 
 import com.roy.cheetah.rpc.*;
+import com.roy.cheetah.rpc.exception.RpcException;
 import com.roy.cheetah.rpc.net.AbstractRpcConnector;
 import com.roy.cheetah.rpc.net.RpcCallListener;
 import com.roy.cheetah.rpc.serializer.JdkSerializer;
@@ -45,16 +46,20 @@ public abstract class AbstractClientRemoteExecutor implements RemoteExecutor, Rp
         byte[] buffer = serializer.serialize(call);
         int length = buffer.length;
         RpcObject request = new RpcObject(INVOKE, this.getIndex(), length, buffer);
-        RpcCallSync sync = new RpcCallSync()
+        RpcCallSync sync = new RpcCallSync(request.getIndex(), request);
+        rpcCache.put(this.makeRpcCallCacheKey(request.getThreadId(), request.getIndex()), sync);
+        connector.sendRpcObject(request, timeout);
+        clientRpcSync.waitForResult(timeout, sync);
+        rpcCache.remove(sync.getIndex());
+        RpcObject response = sync.getResponse();
+        if (response == null) {
+            throw new RpcException("rpc response == null");
+        }
+
+        if (response.getLength() > 0) {
+            return serializer.deserialize(sync.getResponse().getData());
+        }
         return null;
-    }
-
-    public void startService() {
-
-    }
-
-    public void stopService() {
-
     }
 
     public void onRpcMessage(RpcObject rpc, RpcSender sender) {
