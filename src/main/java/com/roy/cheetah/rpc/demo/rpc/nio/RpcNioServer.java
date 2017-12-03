@@ -5,6 +5,7 @@ import com.roy.cheetah.rpc.demo.rpc.provider.impl.HelloRpcServiceImpl;
 import com.roy.cheetah.rpc.net.AbstractRpcAcceptor;
 import com.roy.cheetah.rpc.nio.RpcNioAcceptor;
 import com.roy.cheetah.rpc.server.RpcServiceProvider;
+import com.roy.cheetah.rpc.server.SimpleServerRemoteExecutor;
 import org.apache.log4j.Logger;
 
 /**
@@ -30,13 +31,10 @@ public class RpcNioServer {
 
         proxy.registerRemote(HelloRpcService.class, obj);
 
-        HelloRpcTestServiceImpl obj2 = new HelloRpcTestServiceImpl();
+        HelloRpcServiceImpl obj2 = new HelloRpcServiceImpl();
 
-        proxy.registerRemote(HelloRpcTestService.class, obj2);
+        proxy.registerRemote(HelloRpcService.class, obj2);
 
-        LoginRpcService loginService = new LoginRpcServiceImpl();
-
-        proxy.registerRemote(LoginRpcService.class, loginService);
 
         provider.setExecutor(proxy);
 
@@ -49,4 +47,5 @@ public class RpcNioServer {
         acceptor.startService();
 
         logger.info("service started");
+    }
 }
