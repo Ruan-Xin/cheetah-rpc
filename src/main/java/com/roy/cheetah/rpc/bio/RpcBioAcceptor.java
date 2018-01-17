@@ -2,6 +2,7 @@ package com.roy.cheetah.rpc.bio;
 
 import com.roy.cheetah.rpc.exception.RpcException;
 import com.roy.cheetah.rpc.net.AbstractRpcAcceptor;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -11,6 +12,9 @@ import java.net.ServerSocket;
  * Created by rx on 2017/12/4.
  */
 public class RpcBioAcceptor extends AbstractRpcAcceptor {
+
+    private final static Logger logger = Logger.getLogger(RpcBioAcceptor.class);
+
     private ServerSocket serverSocket;
 
     @Override
@@ -38,7 +42,6 @@ public class RpcBioAcceptor extends AbstractRpcAcceptor {
             while (!stop) {
                 try {
                     serverSocket.accept();
-
                 } catch (IOException e) {
                     RpcBioAcceptor.this.handleNetException(e);
                 }
@@ -47,8 +50,8 @@ public class RpcBioAcceptor extends AbstractRpcAcceptor {
     }
 
     public void handleNetException(Exception e) {
-
+        logger.error("bio acceptor io exception, start to shutdown service!");
+        this.stopService();
+        throw new RpcException(e);
     }
-
-
 }

@@ -3,6 +3,7 @@ package com.roy.cheetah.rpc.demo.rpc.nio;
 import com.roy.cheetah.rpc.client.SimpleClientRemoteExecutor;
 import com.roy.cheetah.rpc.client.SimpleClientRemoteProxy;
 import com.roy.cheetah.rpc.demo.rpc.provider.HelloRpcService;
+import com.roy.cheetah.rpc.demo.rpc.provider.impl.HelloRpcServiceImpl;
 import com.roy.cheetah.rpc.net.AbstractRpcConnector;
 import com.roy.cheetah.rpc.nio.RpcNioConnector;
 import org.apache.log4j.Logger;
@@ -29,6 +30,8 @@ public class RpcNioClient {
 
         proxy.startService();
 
+//        HelloRpcService htest = new HelloRpcServiceImpl();
+//        htest.sayHello("this is test",564);
         HelloRpcService helloRpcService = proxy.registerRemote(HelloRpcService.class);
         logger.info("start client");
 
@@ -44,12 +47,12 @@ public class RpcNioClient {
 
         logger.info("exResult:"+ex);
 
-        long start = System.currentTimeMillis();
-        int total = 10000;
-        for(int i=0;i<total;i++){
-            helloRpcService.sayHello("this is HelloRpcService",564);
-        }
-        long end = System.currentTimeMillis();
-        System.out.println("cost:"+(end-start));
+//        long start = System.currentTimeMillis();
+//        int total = 10000;
+//        for(int i=0;i<total;i++){
+//            helloRpcService.sayHello("this is HelloRpcService",564);
+//        }
+//        long end = System.currentTimeMillis();
+//        System.out.println("cost:"+(end-start));
     }
 }
