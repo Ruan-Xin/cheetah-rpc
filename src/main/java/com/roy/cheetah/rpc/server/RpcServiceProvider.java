@@ -126,7 +126,7 @@ public class RpcServiceProvider implements RpcCallListener, RpcFilter, RpcServic
             if(message!=null){
                 byte[] data = message.getBytes();
                 respRpc.setLength(data.length);
-                if(data.length>0){
+                if(data.length > 0){
                     respRpc.setData(data);
                 }
             }
