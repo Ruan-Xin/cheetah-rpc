@@ -3,7 +3,6 @@ package com.roy.cheetah.rpc.demo.rpc.nio;
 import com.roy.cheetah.rpc.client.SimpleClientRemoteExecutor;
 import com.roy.cheetah.rpc.client.SimpleClientRemoteProxy;
 import com.roy.cheetah.rpc.demo.rpc.provider.HelloRpcService;
-import com.roy.cheetah.rpc.demo.rpc.provider.impl.HelloRpcServiceImpl;
 import com.roy.cheetah.rpc.net.AbstractRpcConnector;
 import com.roy.cheetah.rpc.nio.RpcNioConnector;
 import org.apache.log4j.Logger;

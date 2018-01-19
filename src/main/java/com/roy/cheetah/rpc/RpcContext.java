@@ -9,6 +9,8 @@ import java.util.Map;
  */
 public class RpcContext {
 
+    private Map<String, Object> attachment = new HashMap<String, Object>();
+
     private static ThreadLocal<RpcContext> context = new ThreadLocal<RpcContext>(){
         @Override
         protected RpcContext initialValue() {
@@ -23,8 +25,6 @@ public class RpcContext {
     public void clear() {
         context.remove();
     }
-
-    private Map<String, Object> attachment = new HashMap<String, Object>();
 
     public void putAll(Map<String, Object> attachment) {
         if (attachment != null) {
