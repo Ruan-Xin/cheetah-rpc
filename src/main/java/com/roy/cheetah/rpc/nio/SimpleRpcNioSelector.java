@@ -100,6 +100,7 @@ public class SimpleRpcNioSelector extends AbstractRpcNioSelector {
 
     public synchronized void startService() {
         if (!started) {
+            //select ready channels to op
             new SelectionThread().start();
             started = true;
         }
