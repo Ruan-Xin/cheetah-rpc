@@ -1,9 +1,0 @@
-2018-01-23 20:57:20 0    [Thread-0] (SimpleRpcNioSelector.java:159) INFO  - select thread has started:10
-2018-01-23 20:57:20 10   [main] (RpcNioServer.java:49) INFO  - service started
-2018-01-23 20:57:25 5257 [Thread-0] (RpcNioConnector.java:65) INFO  - localAddress->127.0.0.1:4332 remoteAddress->127.0.0.1:55286
-2018-01-23 20:57:25 0    [main] (RpcNioConnector.java:57) INFO  - connect to 127.0.0.1:4332 success
-2018-01-23 20:57:25 13   [Thread-0] (SimpleRpcNioSelector.java:159) INFO  - select thread has started:10
-2018-01-23 20:57:25 17   [main] (RpcNioConnector.java:65) INFO  - localAddress->127.0.0.1:55286 remoteAddress->127.0.0.1:4332
-2018-01-23 20:57:25 29   [main] (RpcNioClient.java:35) INFO  - start client
-2018-01-23 20:57:25 324  [main] (RpcNioClient.java:45) INFO  - hello result:this is hello service
-2018-01-23 20:57:25 324  [main] (RpcNioClient.java:47) INFO  - exResult:1
