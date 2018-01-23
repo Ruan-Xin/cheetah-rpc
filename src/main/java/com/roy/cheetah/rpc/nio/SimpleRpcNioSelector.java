@@ -1,6 +1,7 @@
 package com.roy.cheetah.rpc.nio;
 
 import com.roy.cheetah.rpc.RpcObject;
+import com.roy.cheetah.rpc.RpcTask;
 import com.roy.cheetah.rpc.exception.RpcException;
 import com.roy.cheetah.rpc.net.AbstractRpcConnector;
 import org.apache.log4j.Logger;
@@ -28,7 +29,7 @@ public class SimpleRpcNioSelector extends AbstractRpcNioSelector {
     private List<RpcNioAcceptor> acceptors;
     private final static int READ_OP = SelectionKey.OP_READ;
     private final static int READ_WRITE_OP = SelectionKey.OP_READ | SelectionKey.OP_WRITE;
-    private LinkedList<Runnable> selectTasks = new LinkedList<Runnable>();
+    private LinkedList<RpcTask> selectTasks = new LinkedList<RpcTask>();
 
     private AbstractRpcNioSelector delegageSelector;
 
@@ -59,7 +60,7 @@ public class SimpleRpcNioSelector extends AbstractRpcNioSelector {
 
     public void register(final RpcNioAcceptor acceptor) {
         final ServerSocketChannel channel = acceptor.getServerSocketChannel();
-            this.addSelectTask(new Runnable() {
+            this.addSelectTask(new RpcTask() {
                 public void run() {
                     try {
                         channel.register(selector, SelectionKey.OP_ACCEPT);
@@ -80,7 +81,7 @@ public class SimpleRpcNioSelector extends AbstractRpcNioSelector {
     }
 
     public void register(final RpcNioConnector connector) {
-        this.addSelectTask(new Runnable() {
+        this.addSelectTask(new RpcTask() {
             public void run() {
                 try {
                     SelectionKey selectionKey = connector.getChannel().register(selector, READ_OP);
@@ -130,17 +131,17 @@ public class SimpleRpcNioSelector extends AbstractRpcNioSelector {
         return needSend;
     }
 
-    private void addSelectTask(Runnable task) {
+    private void addSelectTask(RpcTask task) {
         selectTasks.offer(task);
     }
 
     private boolean hasTask() {
-        Runnable peek = selectTasks.peek();
+        RpcTask peek = selectTasks.peek();
         return peek != null;
     }
 
     private void runSelectTasks() {
-        Runnable peek = selectTasks.peek();
+        RpcTask peek = selectTasks.peek();
         while (peek != null) {
             peek = selectTasks.poll();
             peek.run();
