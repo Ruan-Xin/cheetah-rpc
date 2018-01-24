@@ -54,7 +54,6 @@ public abstract class AbstractRpcWriter implements RpcService, RpcOutputNofity {
         @Override
         public void run() {
             boolean hasSend = false;
-            logger.info("nio common send service start!");
             while (!stop) {
                 try {
                     for (AbstractRpcConnector connector:connectors) {

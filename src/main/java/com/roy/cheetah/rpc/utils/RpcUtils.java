@@ -164,6 +164,16 @@ public class RpcUtils {
 		}
 	}
 
+	private static void dataTooLongEx(RpcObject rpcObject, InputStream dis) throws IOException {
+		if (rpcObject.getLength() > 0) {
+			if (rpcObject.getLength() > MEM_512KB) {
+				throw new RpcException("rpc data too long "	+ rpcObject.getLength());
+			}
+			byte[] buf = new byte[rpcObject.getLength()];
+			dis.read(buf);
+			rpcObject.setData(buf);
+		}
+	}
 	public static RpcObject readRpc(InputStream dis, byte[] buffer,RpcNetExceptionHandler handler) {
 		try {
 			RpcObject rpc = new RpcObject();
@@ -178,14 +188,8 @@ public class RpcUtils {
 			byte[] lenBytes = new byte[4];
 			dis.read(lenBytes);
 			rpc.setLength(RpcUtils.bytesToInt(lenBytes));
-			if (rpc.getLength() > 0) {
-				if (rpc.getLength() > MEM_512KB) {
-					throw new RpcException("rpc data too long "	+ rpc.getLength());
-				}
-				byte[] buf = new byte[rpc.getLength()];
-				dis.read(buf);
-				rpc.setData(buf);
-			}
+
+			dataTooLongEx(rpc, dis);
 			return rpc;
 		} catch (IOException e) {
 			handleNetException(e,handler);
@@ -200,14 +204,7 @@ public class RpcUtils {
 			rpc.setThreadId(dis.readLong());
 			rpc.setIndex(dis.readInt());
 			rpc.setLength(dis.readInt());
-			if (rpc.getLength() > 0) {
-				if (rpc.getLength() > MEM_512KB) {
-					throw new RpcException("rpc data too long "+ rpc.getLength());
-				}
-				byte[] buf = new byte[rpc.getLength()];
-				dis.read(buf);
-				rpc.setData(buf);
-			}
+			dataTooLongEx(rpc, dis);
 			return rpc;
 		} catch (IOException e) {
 			handleNetException(e,handler);
