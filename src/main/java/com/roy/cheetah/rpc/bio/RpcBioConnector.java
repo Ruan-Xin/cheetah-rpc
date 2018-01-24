@@ -4,6 +4,7 @@ import com.roy.cheetah.rpc.RpcObject;
 import com.roy.cheetah.rpc.net.AbstractRpcConnector;
 import com.roy.cheetah.rpc.net.AbstractRpcWriter;
 import com.roy.cheetah.rpc.utils.RpcUtils;
+import org.apache.log4j.Logger;
 
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -16,6 +17,8 @@ import java.net.Socket;
  * Created by rx on 2017/12/4.
  */
 public class RpcBioConnector extends AbstractRpcConnector {
+
+    private final static Logger log = Logger.getLogger(RpcBioConnector.class);
 
     private Socket socket;
     private DataInputStream dis;
@@ -40,6 +43,7 @@ public class RpcBioConnector extends AbstractRpcConnector {
                 //client call
                 socket = new Socket();
                 socket.connect(new InetSocketAddress(this.getHost(), this.getPort()));
+                log.info("connect to " + getHost() + ":" + getPort() + "success!");
             }
             InetSocketAddress remoteAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
             remoteHost = remoteAddress.getAddress().getHostAddress();
@@ -83,6 +87,7 @@ public class RpcBioConnector extends AbstractRpcConnector {
     }
 
     public void handleNetException(Exception e) {
+        log.info("RpcBioConnector occurs error, stop the service!");
         this.getWriter().unRegisterWrite(this);
         this.stopService();
 
