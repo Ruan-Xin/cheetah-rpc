@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class AbstractRpcWriter implements RpcService, RpcOutputNofity {
 
     private Logger logger = Logger.getLogger(AbstractRpcWriter.class);
+    //every connector need to reg, and get a socket to write by connector
     private List<AbstractRpcConnector> connectors;
     protected Thread sendThread;
     private int interval = 50;

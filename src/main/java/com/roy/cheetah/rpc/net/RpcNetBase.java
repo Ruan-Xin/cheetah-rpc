@@ -18,6 +18,7 @@ public abstract class RpcNetBase extends AbstractRpcNetworkBase implements RpcNe
     private ExecutorService executorService;
     private boolean executorSharable;
 
+    //receive tcp data to handle
     private List<RpcCallListener> callListeners;
     private List<RpcNetListener> netListeners;
 
