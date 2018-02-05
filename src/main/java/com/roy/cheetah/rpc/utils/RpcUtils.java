@@ -48,35 +48,6 @@ public class RpcUtils {
 
 	public static String DEFAULT_GROUP = "default";
 	
-	/**
-	 * 获取本机ipv4地址列表
-	 * @return
-	 */
-	public static List<String> getLocalV4IPs(){
-		List<String> ips = new ArrayList<String>();
-		try {
-			Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-			while(interfaces.hasMoreElements()){
-				NetworkInterface ni = interfaces.nextElement();
-				String name = ni.getDisplayName();
-				if(!ni.isLoopback()&&!ni.isVirtual()&&ni.isUp()){
-					if(name==null||!name.contains("Loopback")){
-						Enumeration<InetAddress> addresses = ni.getInetAddresses();
-						while(addresses.hasMoreElements()){
-							InetAddress address = addresses.nextElement();
-							String ip = address.getHostAddress();
-							if(!ip.contains(":")){
-								ips.add(ip);
-							}
-						}
-					}
-				}
-			}
-		} catch (SocketException e) {
-			logger.error("localips error",e);
-		}
-		return ips;
-	}
 	
 	public static String chooseIP(List<String> ips){
 		Collections.sort(ips);
